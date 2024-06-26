@@ -1,8 +1,12 @@
+import 'package:earthquake_app/provider/app_data_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(ChangeNotifierProvider(
+      create: (BuildContext context) => AppDataProvider(),
+      child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
