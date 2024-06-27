@@ -62,7 +62,7 @@ class AppDataProvider extends ChangeNotifier {
     _startTime = getFormattedDateTime(DateTime.now()
         .subtract(const Duration(days: 1))
         .millisecondsSinceEpoch);
-    _startTime = getFormattedDateTime(DateTime.now().millisecondsSinceEpoch);
+    _endTime = getFormattedDateTime(DateTime.now().millisecondsSinceEpoch);
     _maxRadiusKm = maxRadiusKmThreshold;
     _setQueryParams();
     getEarthquakeData();
@@ -90,5 +90,17 @@ class AppDataProvider extends ChangeNotifier {
     } catch (error) {
       print(error.toString());
     }
+  }
+
+  void setStartTime(String date) {
+    _startTime = date;
+    _setQueryParams();
+    notifyListeners();
+  }
+
+  void setEndTime(String date) {
+    _endTime = date;
+    _setQueryParams();
+    notifyListeners();
   }
 }

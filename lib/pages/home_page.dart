@@ -1,3 +1,4 @@
+import 'package:earthquake_app/pages/settings_page.dart';
 import 'package:earthquake_app/provider/app_data_provider.dart';
 import 'package:earthquake_app/utils/helper_functions.dart';
 import 'package:flutter/cupertino.dart';
@@ -25,7 +26,12 @@ class _HomePageState extends State<HomePage> {
         title: const Text('EarthQuake Info'),
         actions: [
           IconButton(
-              onPressed: _showSortingDialog, icon: const Icon(Icons.sort))
+              onPressed: _showSortingDialog, icon: const Icon(Icons.sort)),
+          IconButton(
+              onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SettingsPage())),
+              icon: const Icon(Icons.settings))
         ],
       ),
       body: Consumer<AppDataProvider>(
@@ -108,7 +114,7 @@ class _HomePageState extends State<HomePage> {
               ),
           actions: [
             TextButton(
-                onPressed: () => Navigator.pop(context), 
+                onPressed: () => Navigator.pop(context),
                 child: const Text('Close'))
           ],
             ));
