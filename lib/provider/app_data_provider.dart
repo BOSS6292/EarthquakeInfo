@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:earthquake_app/models/earthquake_model.dart';
 import 'package:earthquake_app/utils/helper_functions.dart';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 
 class AppDataProvider extends ChangeNotifier {
   final baseUrl = Uri.parse('https://earthquake.usgs.gov/fdsnws/event/1/query');
@@ -44,10 +47,28 @@ class AppDataProvider extends ChangeNotifier {
     queryParams['maxradiuskm'] = '$_maxRadiusKm';
   }
 
-  init(){
-    _startTime = getFormattedDateTime(DateTime.now().subtract(const Duration(days: 1)).millisecondsSinceEpoch);
+  init() {
+    _startTime = getFormattedDateTime(DateTime.now()
+        .subtract(const Duration(days: 1))
+        .millisecondsSinceEpoch);
     _startTime = getFormattedDateTime(DateTime.now().millisecondsSinceEpoch);
     _maxRadiusKm = maxRadiusKmThreshold;
     _setQueryParams();
+    getEarthquakeData();
+  }
+
+  Future<void> getEarthquakeData() async {
+    final uri = Uri.https(baseUrl.authority, baseUrl.path, queryParams);
+    try {
+      final response = await http.get(uri);
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        earthquakeModel = EarthquakeModel.fromJson(json);
+        print(earthquakeModel!.features!.length);
+        notifyListeners();
+      }
+    } catch (error) {
+      print(error.toString());
+    }
   }
 }
