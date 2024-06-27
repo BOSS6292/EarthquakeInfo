@@ -39,6 +39,13 @@ class AppDataProvider extends ChangeNotifier {
 
   bool get hasDataLoaded => earthquakeModel!=null;
 
+  void setOrder(String value){
+    _orderBy = value;
+    notifyListeners();
+    _setQueryParams();
+    getEarthquakeData();
+  }
+
   _setQueryParams() {
     queryParams['format'] = 'geojson';
     queryParams['starttime'] = _startTime;
