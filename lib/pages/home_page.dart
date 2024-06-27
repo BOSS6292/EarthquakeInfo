@@ -38,6 +38,9 @@ class _HomePageState extends State<HomePage> {
               subtitle: Text(
                   getFormattedDateTime(data.time!, 'EEE MMM dd yyyy hh:mm a')),
               trailing: Chip(
+                avatar: data.alert == null ? null : CircleAvatar(
+                  backgroundColor: provider.getAlertColor(data.alert!),
+                ),
                 label: Text(
                     '${data.mag}'
                 ),

@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:ui';
 
 import 'package:earthquake_app/models/earthquake_model.dart';
 import 'package:earthquake_app/utils/helper_functions.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class AppDataProvider extends ChangeNotifier {
@@ -57,6 +59,15 @@ class AppDataProvider extends ChangeNotifier {
     _maxRadiusKm = maxRadiusKmThreshold;
     _setQueryParams();
     getEarthquakeData();
+  }
+
+  Color getAlertColor(String color){
+    return switch(color){
+      'green' => Colors.green,
+      'yellow' => Colors.yellow,
+      'orange' => Colors.orange,
+       _=>Colors.red,
+    };
   }
 
   Future<void> getEarthquakeData() async {
