@@ -5,7 +5,46 @@ import 'package:earthquake_app/models/earthquake_model.dart';
 import 'package:earthquake_app/utils/helper_functions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart' as gc;
 import 'package:http/http.dart' as http;
+
+Future<Position> _determinePosition() async {
+  bool serviceEnabled;
+  LocationPermission permission;
+
+  // Test if location services are enabled.
+  serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    // Location services are not enabled don't continue
+    // accessing the position and request users of the
+    // App to enable the location services.
+    return Future.error('Location services are disabled.');
+  }
+
+  permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      // Permissions are denied, next time you could try
+      // requesting permissions again (this is also where
+      // Android's shouldShowRequestPermissionRationale
+      // returned true. According to Android guidelines
+      // your App should show an explanatory UI now.
+      return Future.error('Location permissions are denied');
+    }
+  }
+
+  if (permission == LocationPermission.deniedForever) {
+    // Permissions are denied forever, handle appropriately.
+    return Future.error(
+        'Location permissions are permanently denied, we cannot request permissions.');
+  }
+
+  // When we reach here, permissions are granted and we can
+  // continue accessing the position of the device.
+  return await Geolocator.getCurrentPosition();
+}
 
 class AppDataProvider extends ChangeNotifier {
   final baseUrl = Uri.parse('https://earthquake.usgs.gov/fdsnws/event/1/query');
@@ -102,5 +141,39 @@ class AppDataProvider extends ChangeNotifier {
     _endTime = date;
     _setQueryParams();
     notifyListeners();
+  }
+
+  Future<void> setLocation(bool value) async {
+    _shouldUseLocation = value;
+    notifyListeners();
+    if(value){
+      final position = await _determinePosition();
+      _latitude = position.latitude;
+      _longitude = position.longitude;
+      await _getCurrentCity();
+      _maxRadiusKm = 500;
+      _setQueryParams();
+      getEarthquakeData();
+    }else{
+      _longitude = 0.0;
+      _latitude = 0.0;
+      _maxRadiusKm = _maxRadiusKmThreshold;
+      _currentCity = null;
+      _setQueryParams();
+      getEarthquakeData();
+    }
+  }
+
+  Future<void> _getCurrentCity() async {
+    try{
+      final placemarkList = await gc.placemarkFromCoordinates(latitude, longitude);
+      if(placemarkList.isNotEmpty){
+        final placemark = placemarkList.first;
+        _currentCity = placemark.locality;
+        notifyListeners();
+      }
+    }catch(error){
+      print(error);
+    }
   }
 }

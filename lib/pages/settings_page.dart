@@ -1,6 +1,7 @@
 import 'package:earthquake_app/provider/app_data_provider.dart';
 import 'package:earthquake_app/utils/helper_functions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:provider/provider.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -21,8 +22,10 @@ class _SettingsPageState extends State<SettingsPage> {
         builder: (context, provider, child) => ListView(
           padding: const EdgeInsets.all(8.0),
           children: [
-            Text('Time Settings',
-              style: Theme.of(context).textTheme.titleMedium,),
+            Text(
+              'Time Settings',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             Card(
               child: Column(
                 children: [
@@ -30,9 +33,9 @@ class _SettingsPageState extends State<SettingsPage> {
                     title: const Text('Start Time'),
                     subtitle: Text(provider.startTime),
                     trailing: IconButton(
-                      onPressed: () async{
+                      onPressed: () async {
                         final date = await selectDate();
-                        if(date != null){
+                        if (date != null) {
                           provider.setStartTime(date);
                         }
                       },
@@ -43,9 +46,9 @@ class _SettingsPageState extends State<SettingsPage> {
                     title: const Text('End Time'),
                     subtitle: Text(provider.endTime),
                     trailing: IconButton(
-                      onPressed: () async{
+                      onPressed: () async {
                         final date = await selectDate();
-                        if(date != null){
+                        if (date != null) {
                           provider.setEndTime(date);
                         }
                       },
@@ -53,12 +56,31 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ),
                   ElevatedButton(
-                      onPressed: (){
+                      onPressed: () {
                         provider.getEarthquakeData();
                         showMsg(context, 'Data is fetched!');
                       },
                       child: const Text('Update Time Changes'))
                 ],
+              ),
+            ),
+            Text(
+              'Location Settings',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            Card(
+              child: SwitchListTile(
+                title: Text(provider.currentCity ?? 'Your location is unknown'),
+                subtitle: provider.currentCity == null
+                    ? null
+                    : Text(
+                        'Earthquake data will be shown within ${provider.maxRadiusKm} kms radius from ${provider.currentCity}'),
+                value: provider.shouldUseLocation,
+                onChanged: (value) async {
+                  EasyLoading.show(status: 'Getting Location...');
+                  await provider.setLocation(value);
+                  EasyLoading.dismiss();
+                },
               ),
             )
           ],
@@ -72,9 +94,8 @@ class _SettingsPageState extends State<SettingsPage> {
         context: context,
         initialDate: DateTime.now(),
         firstDate: DateTime(2000),
-        lastDate: DateTime.now()
-    );
-    if(dt!=null){
+        lastDate: DateTime.now());
+    if (dt != null) {
       return getFormattedDateTime(dt.millisecondsSinceEpoch);
     }
     return null;
